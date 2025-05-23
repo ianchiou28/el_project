@@ -1,0 +1,44 @@
+stages:
+  - build
+
+build-job:
+  stage: build
+  image: ubuntu:latest
+  
+  before_script:
+    - apt-get update && apt-get install -y curl git jq
+    - curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+    - apt-get install -y nodejs cargo
+    - export PATH="$HOME/.cargo/bin:$PATH"
+    - node -v
+    - npm -v
+    - rustc --version
+    - cargo --version
+    - mkdir -vp ${CARGO_HOME:-$HOME/.cargo}
+    - cat << EOF | tee -a ${CARGO_HOME:-$HOME/.cargo}/config.toml
+      [source.crates-io]
+      replace-with = 'mirror'
+
+      [source.mirror]
+      registry = "sparse+https://mirrors.cernet.edu.cn/crates.io-index/"
+
+      [registries.mirror]
+      index = "sparse+https://mirrors.cernet.edu.cn/crates.io-index/"
+      EOF
+
+  script:
+    - cd /builds/Insouciant21/vue_diary
+    - echo "正在安装项目依赖..."
+    - npm install
+    - echo "正在构建 Tauri 应用..."
+    - npm run build:tauri
+    - ls -al
+
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME-artifacts" 
+    paths:
+      - "/builds/Insouciant21/vue_diary/src-tauri/target/release" 
+    exclude:
+      - "/builds/Insouciant21/vue_diary/src-tauri/target/release/build" 
+      - "/builds/Insouciant21/vue_diary/src-tauri/target/release/deps" 
+    expire_in: 1 week
