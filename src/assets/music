@@ -1,0 +1,48 @@
+// filepath: c:\Users\ian28\Desktop\vue_diary\src\components\MusicPlayer.vue
+<template>
+  <div class="music-player">
+    <h2>音乐播放器</h2>
+    <audio ref="audio" :src="currentTrack.url" @ended="nextTrack" controls></audio>
+    <div class="track-info">
+      <p>{{ currentTrack.title }}</p>
+      <p>{{ currentTrack.artist }}</p>
+    </div>
+    <button @click="prevTrack">上一曲</button>
+    <button @click="nextTrack">下一曲</button>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+
+const tracks = ref([
+  { title: '歌曲1', artist: '艺术家1', url: 'path/to/song1.mp3' },
+  { title: '歌曲2', artist: '艺术家2', url: 'path/to/song2.mp3' },
+  // 添加更多歌曲
+]);
+
+const currentTrackIndex = ref(0);
+const currentTrack = ref(tracks.value[currentTrackIndex.value]);
+
+const nextTrack = () => {
+  currentTrackIndex.value = (currentTrackIndex.value + 1) % tracks.value.length;
+  currentTrack.value = tracks.value[currentTrackIndex.value];
+};
+
+const prevTrack = () => {
+  currentTrackIndex.value = (currentTrackIndex.value - 1 + tracks.value.length) % tracks.value.length;
+  currentTrack.value = tracks.value[currentTrackIndex.value];
+};
+</script>
+
+<style scoped>
+.music-player {
+  padding: 16px;
+  border: 1px solid var(--md-outline);
+  border-radius: 8px;
+  background-color: var(--md-surface-variant);
+}
+.track-info {
+  margin: 10px 0;
+}
+</style>
